@@ -1,0 +1,148 @@
+\documentclass[12pt]{article}
+\usepackage{listings}
+\usepackage{color}  
+\usepackage{graphicx}
+\usepackage[english]{babel}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{vmargin}
+\setmarginsrb{3 cm}{2.5 cm}{3 cm}{2.5 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+
+\lstset{ %
+  language=Octave,                % the language of the code
+  basicstyle=\footnotesize,           % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=2,                   % the step between two line-numbers. If it's 1, each line 
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},      % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                   % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\color{blue},          % keyword style
+  commentstyle=\color{dkgreen},       % comment style
+  stringstyle=\color{mauve},         % string literal style
+  escapeinside={\%*}{*)},            % if you want to add LaTeX within your code
+  morekeywords={*,...}               % if you want to add more keywords to the set
+}
+
+\title{The report of Project 1}               % Title
+\author{Yang Nianzu}               % Author
+\date{\today}                     % Date
+
+\makeatletter
+\let\thetitle\@title
+\let\theauthor\@author
+\let\thedate\@date
+\makeatother
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\theauthor}
+\lhead{\thetitle}
+\cfoot{\thepage}
+
+\begin{document}
+\begin{titlepage}
+  \centering
+    \vspace*{0.5 cm}
+    \includegraphics[scale = 0.75]{logo}\\[1.0 cm] % University Logo
+    \textsc{\LARGE SHANGHAI JIAO TONG UNIVERSITY}\\[2.0 cm] % University Name
+  \textsc{\Large IEEE CLASS}\\[0.5 cm]       % Course Code
+  \textsc{\large Computer Systems Engineering}\\[0.5 cm]       % Course Name
+  \rule{\linewidth}{0.2 mm} \\[0.4 cm]
+  { \huge \bfseries \thetitle}\\
+  \rule{\linewidth}{0.2 mm} \\[1.5 cm]
+  
+  \begin{minipage}{0.4\textwidth}
+    \begin{flushleft} \large
+      \emph{Author:}\\
+      \theauthor
+      \end{flushleft}
+      \end{minipage}~
+      \begin{minipage}{0.4\textwidth}
+      \begin{flushright} \large
+      \emph{Student Number:} \\
+      517030910301                 % Your Student Number
+    \end{flushright}
+  \end{minipage}\\[2 cm]
+  
+  {\large \thedate}\\[2 cm]
+ 
+  \vfill
+  
+\end{titlepage}
+
+
+
+
+\newpage
+
+\tableofcontents
+\newpage
+\section{The environment of the experiment}
+\paragraph{}
+I finish this experiment on a Linux virtual machine through VMware. And the version of my Linux is 14.04.5. In order to make it more convenient to edit files, I installed Sublime on my virtual machine.
+
+\section{Problem 1}
+\subsection{Analysis}
+\paragraph{}In this problem, we are asked to design a kernel module that creates a /proc file named /proc/jiffies that reports the current value of jiffies when the /proc/jiffies file is read.
+\paragraph{}
+In fact, this problem is not difficult to cope with. Before we begin to do the assignment, the textbook has provided us with some examples to exercise. The textbook has told us how to design a kernel module that creates a kernel module that creates a /proc file named /proc/jiffies. If a user enters the command “cat /proc/hello”, “Hello World” message will be returned.
+\paragraph{}This problem is similiar to this example. We just need to change the content it will return. In this problem, we need to return the value of jiffies which maintains the number of timer interrupts that have occurred since the system was booted. And the jiffies variable is declared in the file “linux/jiffies.h”. So the file should include this necessary header files.
+\paragraph{}The main part in the problem which differs from the example in the textbook is the content returned. To realize this goal, we only need to change one line of the codes of the example into the following code.
+\begin{lstlisting}[language=Python, caption=Script]
+        rv = sprintf(buffer, "The current value of jiffies is %d\n",jiffies);
+\end{lstlisting}
+\paragraph{}Because jiffies in a int. So we need to add “\%d” when we want to output it.Then the value of jiffies is written to the variable buffer where buffer exists in kernel memory. Sinci /proc/jiffies can ge accessed from user space, we must copy the contents of buffer to buffer to user space using the kernel function copy\_to\_user().
+\paragraph{}Now, the problem have been solved.
+\subsection{Result}
+\paragraph{}The result will be demonstrated as follows.
+\begin{figure}[htbp] 
+\centering 
+\includegraphics[height=6cm, width=15cm]{1}
+\caption{Result of the Problem 1} 
+\end{figure}
+
+\section{Problem 2}
+\subsection{Analysis}
+\paragraph{}In problem 2, we are asked to design a kernel module that creats a /proc file mamed /proc/seceonds that reports the number of elapsed seconds since the kernel module was loaded. This will involve using the value of jiffies as well as the HZ rate. When a user enters the command “cat /proc/seconds”, the kernel module will report the number of seconds that have elapsed since the kernel module was first loaded.
+\paragraph{}How to use the variable jiffies has been introduced in Problem 1. And the method of application of the varieable HZ is almost the same. It's corresponding header file is asm/param.h.
+\paragraph{}Then we begin to design the timer. It's asked that the module need to return the number of seconds that have elapsed since the kernerl module was first loaded. So we need to find a method to calculate the time. It's easy to come up with the following the formula.
+\begin{center}
+$time=\frac{jiffies_{current}-jiffies_{initial}}{HZ}$
+\end{center}
+\paragraph{}$jiffies_{current}$ represents the value when we enter the command and $jiffies_{initial}$ represents the value when the kernel module was first loaded. Here comes the question that when we should record the value. For convenience, I defined two global variables named start and end to record the initial and the current value of jiffies in the beginning. When we first load the kernel module, we assign the current value of jiffies to start. Therefore, I realize this step in function proc\_init. And I assign the current value of jiffies to end in function proc\_read. In this way, we can have the jiffies's increment everytime we enter the command. Because the value of HZ is easy to get, so we can work out the number of seconds that have elapsed since the kerner module was first loaded.
+\paragraph{}
+Then we can use the same method mentioned in Problem 1 to display the result in terminal.
+\subsection{Result}
+\paragraph{}The result will be demonstrated as follows.
+\begin{figure}[htbp] 
+\centering 
+\includegraphics[height=6cm, width=15cm]{2}
+\caption{Result of the Problem 2} 
+\end{figure}
+\section{Acknowledgement}
+\paragraph{}
+Thanks for the guidance of teacher Wu Chentao. Without enough knowledge we learned in class, we cann't finish this project easily. Also thanks for assitants' effort.
+\end{document}
